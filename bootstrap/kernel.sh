@@ -2,7 +2,7 @@
 
 set -xe
 
-echo "modules=loop,squashfs,sd-mod,usb-storage root=/dev/mmcblk0p2 rootfstype=ext4 elevator=deadline fsck.repair=yes console=tty1 rootwait quiet" > /boot/cmdline.txt
+echo "modules=loop,squashfs,sd-mod,usb-storage root=/dev/mmcblk0p2 rootfstype=ext4 elevator=deadline fsck.repair=yes console=tty1 rootwait quiet cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory" > /boot/cmdline.txt
 
 cat <<EOF > /boot/config.txt
 [pi3]
@@ -19,7 +19,7 @@ initramfs initramfs-rpi4
 arm_64bit=1
 include usercfg.txt
 EOF
-  
+
 cat <<EOF > /boot/usercfg.txt
 EOF
 
