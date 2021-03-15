@@ -14,7 +14,7 @@ setup-keymap es es
 
 # time
 apk add chrony tzdata
-setup-timezone -z Europe/Madrid
+setup-timezone -z UTC
 
 # other stuff
 apk add nano htop curl wget bash bash-completion
