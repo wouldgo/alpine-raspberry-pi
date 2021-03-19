@@ -86,6 +86,7 @@ losetup -d "$LOOP_DEV"
 FREE_START=$(parted -ms "$OUTPUT_IMG" unit B print free | tail -1 | cut -d ':' -f 2 | tr -d 'B')
 truncate -s $FREE_START "$OUTPUT_IMG"
 
+cp $OUTPUT_IMG dist/alpine-rpi-$ALPINE_BRANCH-$ARCH.img
 gzip -c "$OUTPUT_IMG" > "dist/alpine-rpi-$ALPINE_BRANCH-$ARCH.img.gz"
 
 echo "DONE."
