@@ -25,7 +25,6 @@ chmod 600 /swapfile
 mkswap /swapfile
 echo "/swapfile       none            swap    sw                0       0" >> /etc/fstab
 
-/etc/periodic/daily/poll-ntp-pool.sh
 reboot
 EOF
 
