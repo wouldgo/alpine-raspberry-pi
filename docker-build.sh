@@ -16,7 +16,7 @@ function do_it() {
     -e TARGET_HOSTNAME="${TARGET_HOSTNAME}" \
     -e ROOT_PASSWORD="${ROOT_PASSWORD}" \
     -e PASSWORD="${PASSWORD}" \
-    runner bash
+    runner ./make-image
 }
 
 do_it "$@"
