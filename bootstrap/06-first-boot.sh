@@ -1,14 +1,19 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
+function do_it () {
+  set -xe
+
+  local DEVICE_NAME
+
+  DEVICE_NAME="${2}"
+
+  apk add --no-cache dosfstools e2fsprogs-extra parted
+
+  cat <<EOF > /usr/bin/first-boot
+#!/bin/sh
 set -xe
 
-apk add --no-cache dosfstools e2fsprogs-extra parted
-
-cat <<EOF > /usr/bin/first-boot
-#!/bin/sh
-set -xe
-
-cat <<PARTED | sudo parted ---pretend-input-tty /dev/sda
+cat <<PARTED | sudo parted ---pretend-input-tty /dev/${DEVICE_NAME}
 unit %
 resizepart 2
 Yes
@@ -16,7 +21,7 @@ Yes
 PARTED
 
 partprobe
-resize2fs /dev/sda2
+resize2fs /dev/${DEVICE_NAME}2
 rc-update del first-boot
 rm /etc/init.d/first-boot /usr/bin/first-boot
 
@@ -28,7 +33,7 @@ echo "/swapfile       none            swap    sw                0       0" >> /e
 reboot
 EOF
 
-cat <<EOF > /etc/init.d/first-boot
+  cat <<EOF > /etc/init.d/first-boot
 #!/sbin/openrc-run
 command="/usr/bin/first-boot"
 command_background=false
@@ -38,5 +43,8 @@ depend() {
 }
 EOF
 
-chmod +x /etc/init.d/first-boot /usr/bin/first-boot
-rc-update add first-boot
+  chmod +x /etc/init.d/first-boot /usr/bin/first-boot
+  rc-update add first-boot
+}
+
+do_it "$@"

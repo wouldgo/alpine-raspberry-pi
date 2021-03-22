@@ -4,6 +4,7 @@ function do_it() {
   set -xe
 
   docker run \
+    -it \
     --privileged \
     --rm \
     -v /dev:/dev:ro \
@@ -12,7 +13,10 @@ function do_it() {
     -e ALPINE_BRANCH=latest-stable \
     -e ALPINE_MIRROR="http://dl-cdn.alpinelinux.org/alpine" \
     -e ARCH=aarch64 \
-    runner ./make-image
+    -e TARGET_HOSTNAME="${TARGET_HOSTNAME}" \
+    -e ROOT_PASSWORD="${ROOT_PASSWORD}" \
+    -e PASSWORD="${PASSWORD}" \
+    runner bash
 }
 
 do_it "$@"

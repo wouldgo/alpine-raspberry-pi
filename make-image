@@ -1,15 +1,43 @@
 #!/usr/bin/env bash
 
-set -xe
+function do_it () {
+  set -xe
 
-mkdir -p dist /dist
+  local __TARGET_HOSTNAME
+  local __DEVICE_NAME
+  local __ROOT_PASSWORD
+  local __TLD
+  local __USERNAME
+  local __PASSWORD
 
-OUTPUT_IMG="/dist/target.img"
+  local OUTPUT_IMG
 
-rm -Rf "$OUTPUT_IMG"
-truncate -s 2G "$OUTPUT_IMG"
+  local IMGID
+  local BOOT_PARTUUID
+  local ROOT_PARTUUID
 
-fdisk -H 255 -S 63 "$OUTPUT_IMG" <<-EOF
+  local ROOT_PART_START
+  local ROOT_BLOCK_SIZE
+  local ROOT_MIN_SIZE
+
+  local PART_END
+  local FREE_START
+
+  __TARGET_HOSTNAME="${TARGET_HOSTNAME:-raspberrypi}"
+  __DEVICE_NAME="${DEVICE_NAME:-sda}"
+  __ROOT_PASSWORD="${ROOT_PASSWORD:-raspberry}"
+  __TLD="${TLD:-lan}"
+  __USERNAME=${USERNAME:-pi}
+  __PASSWORD=${PASSWORD:-raspberry}
+
+  OUTPUT_IMG="/dist/target.img"
+
+  mkdir -p dist /dist
+
+  rm -Rf "${OUTPUT_IMG}"
+  truncate -s 2G "${OUTPUT_IMG}"
+
+  fdisk -H 255 -S 63 "${OUTPUT_IMG}" <<-EOF
 o
 n
 p
@@ -26,67 +54,74 @@ p
 w
 EOF
 
-LOOP_DEV=$(losetup --partscan --show --find "${OUTPUT_IMG}")
-BOOT_DEV="$LOOP_DEV"p1
-ROOT_DEV="$LOOP_DEV"p2
+  LOOP_DEV=$(losetup --partscan --show --find "${OUTPUT_IMG}")
+  BOOT_DEV="${LOOP_DEV}"p1
+  ROOT_DEV="${LOOP_DEV}"p2
 
-# format partitions
-mkfs.fat -F32 -n ALPINE "$BOOT_DEV"
-mkfs.ext4 "$ROOT_DEV"
-mkdir -p /alpine
-mount --make-private "$ROOT_DEV" /alpine
-mkdir -p /alpine/boot
-mount --make-private "$BOOT_DEV" /alpine/boot
+  # format partitions
+  mkfs.fat -F32 -n ALPINE "${BOOT_DEV}"
+  mkfs.ext4 "${ROOT_DEV}"
+  mkdir -p /alpine
+  mount --make-private "${ROOT_DEV}" /alpine
+  mkdir -p /alpine/boot
+  mount --make-private "${BOOT_DEV}" /alpine/boot
 
-IMGID="$(dd if="${OUTPUT_IMG}" skip=440 bs=1 count=4 2>/dev/null | xxd -e | cut -f 2 -d' ')"
+  IMGID="$(dd if="${OUTPUT_IMG}" skip=440 bs=1 count=4 2>/dev/null | xxd -e | cut -f 2 -d' ')"
 
-BOOT_PARTUUID="${IMGID}-01"
-ROOT_PARTUUID="${IMGID}-02"
+  BOOT_PARTUUID="${IMGID}-01"
+  ROOT_PARTUUID="${IMGID}-02"
 
-apt-get update
-curl https://raw.githubusercontent.com/alpinelinux/alpine-chroot-install/master/alpine-chroot-install | sh
+  echo "boot partition uuid: ${BOOT_PARTUUID}"
+  echo "root partition uuid: ${ROOT_PARTUUID}"
 
-cp -R bootstrap/ /alpine/
+  apt-get update
+  curl https://raw.githubusercontent.com/alpinelinux/alpine-chroot-install/master/alpine-chroot-install | sh
 
-/alpine/enter-chroot /bootstrap/kernel.sh
-/alpine/enter-chroot /bootstrap/system.sh
-/alpine/enter-chroot /bootstrap/users.sh
-/alpine/enter-chroot /bootstrap/networking.sh
-/alpine/enter-chroot /bootstrap/services.sh
-/alpine/enter-chroot /bootstrap/first-boot.sh
+  cp -R bootstrap/ /alpine/
 
-rm -rf /alpine/var/lib/apt/lists/*
-rm -rf /alpine/var/cache/apk/*
-rm -rf /alpine/root/*
-rm -rf /alpine/bootstrap/
-rm /alpine/enter-chroot
-rm /alpine/etc/resolv.conf
-rm /alpine/env.sh
-find /alpine -iname "*-" -delete
-find /alpine -iname "*~" -delete
+  /alpine/enter-chroot /bootstrap/00-environment.sh "${__TARGET_HOSTNAME}" "${__DEVICE_NAME}" "${__ROOT_PASSWORD}" "${__TLD}" "${__USERNAME}" "${__PASSWORD}"
+  /alpine/enter-chroot /bootstrap/01-kernel.sh "${__TARGET_HOSTNAME}" "${__DEVICE_NAME}" "${__ROOT_PASSWORD}" "${__TLD}" "${__USERNAME}" "${__PASSWORD}"
+  /alpine/enter-chroot /bootstrap/02-system.sh "${__TARGET_HOSTNAME}" "${__DEVICE_NAME}" "${__ROOT_PASSWORD}" "${__TLD}" "${__USERNAME}" "${__PASSWORD}"
+  /alpine/enter-chroot /bootstrap/03-users.sh "${__TARGET_HOSTNAME}" "${__DEVICE_NAME}" "${__ROOT_PASSWORD}" "${__TLD}" "${__USERNAME}" "${__PASSWORD}"
+  /alpine/enter-chroot /bootstrap/04-networking.sh "${__TARGET_HOSTNAME}" "${__DEVICE_NAME}" "${__ROOT_PASSWORD}" "${__TLD}" "${__USERNAME}" "${__PASSWORD}"
+  /alpine/enter-chroot /bootstrap/05-services.sh "${__TARGET_HOSTNAME}" "${__DEVICE_NAME}" "${__ROOT_PASSWORD}" "${__TLD}" "${__USERNAME}" "${__PASSWORD}"
+  /alpine/enter-chroot /bootstrap/06-first-boot.sh "${__TARGET_HOSTNAME}" "${__DEVICE_NAME}" "${__ROOT_PASSWORD}" "${__TLD}" "${__USERNAME}" "${__PASSWORD}"
 
-umount -lf /alpine
+  rm -rf /alpine/var/lib/apt/lists/*
+  rm -rf /alpine/var/cache/apk/*
+  rm -rf /alpine/root/*
+  rm -rf /alpine/bootstrap/
+  rm /alpine/enter-chroot
+  rm /alpine/etc/resolv.conf
+  rm /alpine/env.sh
+  find /alpine -iname "*-" -delete
+  find /alpine -iname "*~" -delete
 
-# shrink image
-ROOT_PART_START=$(parted -ms "$OUTPUT_IMG" unit B print | tail -n 1 | cut -d ':' -f 2 | tr -d 'B')
-ROOT_BLOCK_SIZE=$(tune2fs -l "$ROOT_DEV" | grep '^Block size:' | tr -d ' ' | cut -d ':' -f 2)
-ROOT_MIN_SIZE=$(resize2fs -P "$ROOT_DEV" | cut -d ':' -f 2 | tr -d ' ')
+  umount -lf /alpine
 
-# shrink fs
-e2fsck -f -p "$ROOT_DEV"
-resize2fs -p "$ROOT_DEV" $ROOT_MIN_SIZE
+  # shrink image
+  ROOT_PART_START=$(parted -ms "${OUTPUT_IMG}" unit B print | tail -n 1 | cut -d ':' -f 2 | tr -d 'B')
+  ROOT_BLOCK_SIZE=$(tune2fs -l "${ROOT_DEV}" | grep '^Block size:' | tr -d ' ' | cut -d ':' -f 2)
+  ROOT_MIN_SIZE=$(resize2fs -P "${ROOT_DEV}" | cut -d ':' -f 2 | tr -d ' ')
 
-# shrink partition
-PART_END=$(($ROOT_PART_START + ($ROOT_MIN_SIZE * $ROOT_BLOCK_SIZE)))
-parted ---pretend-input-tty "$OUTPUT_IMG" unit B resizepart 2 $PART_END yes
+  # shrink fs
+  e2fsck -f -p "${ROOT_DEV}"
+  resize2fs -p "${ROOT_DEV}" "${ROOT_MIN_SIZE}"
 
-losetup -d "$LOOP_DEV"
+  # shrink partition
+  PART_END=$((ROOT_PART_START + (ROOT_MIN_SIZE * ROOT_BLOCK_SIZE)))
+  parted ---pretend-input-tty "${OUTPUT_IMG}" unit B resizepart 2 ${PART_END} yes
 
-# truncate free space
-FREE_START=$(parted -ms "$OUTPUT_IMG" unit B print free | tail -1 | cut -d ':' -f 2 | tr -d 'B')
-truncate -s $FREE_START "$OUTPUT_IMG"
+  losetup -d "${LOOP_DEV}"
 
-cp $OUTPUT_IMG dist/alpine-rpi-$ALPINE_BRANCH-$ARCH.img
-gzip -c "$OUTPUT_IMG" > "dist/alpine-rpi-$ALPINE_BRANCH-$ARCH.img.gz"
+  # truncate free space
+  FREE_START=$(parted -ms "${OUTPUT_IMG}" unit B print free | tail -1 | cut -d ':' -f 2 | tr -d 'B')
+  truncate -s "${FREE_START}" "${OUTPUT_IMG}"
 
-echo "DONE."
+  cp ${OUTPUT_IMG} "dist/alpine-rpi-${ALPINE_BRANCH}-${ARCH}.img"
+  gzip -c "$OUTPUT_IMG" > "dist/alpine-rpi-${ALPINE_BRANCH}-${ARCH}.img.gz"
+
+  echo "DONE."
+}
+
+do_it "$@"
