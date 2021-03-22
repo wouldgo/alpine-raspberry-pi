@@ -14,7 +14,10 @@ function do_it() {
     -e ALPINE_MIRROR="http://dl-cdn.alpinelinux.org/alpine" \
     -e ARCH=aarch64 \
     -e TARGET_HOSTNAME="${TARGET_HOSTNAME}" \
+    -e DEVICE_NAME="${DEVICE_NAME}" \
     -e ROOT_PASSWORD="${ROOT_PASSWORD}" \
+    -e TLD="${TLD}" \
+    -e USERNAME="${USERNAME}" \
     -e PASSWORD="${PASSWORD}" \
     runner ./make-image
 }

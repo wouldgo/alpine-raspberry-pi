@@ -13,10 +13,3 @@ The image automatically setup and configures:
 * swap
 * openssh server
 * root partition auto-expand on first boot
-
-
-## After first boot
-
-```sh
-  /etc/periodic/daily/poll-ntp-pool.sh
-```
