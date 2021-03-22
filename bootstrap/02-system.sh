@@ -22,28 +22,21 @@ function do_it () {
   # time
   apk add --no-cache chrony tzdata
   setup-timezone -z UTC
-  echo "#!/bin/sh
+  cat <<EOF > /etc/periodic/daily/poll-ntp-pool.sh
+#!/bin/sh
 
-  ntpd -d -q -n -p pool.ntp.org" >> /etc/periodic/daily/poll-ntp-pool.sh
+until nslookup pool.ntp.org; do
+  echo \"waiting for network\";
+  sleep 1;
+done
+
+ntpd -d -q -n -p pool.ntp.org
+EOF
 
   chmod u+x /etc/periodic/daily/poll-ntp-pool.sh
 
-  cat <<EOF > /etc/init.d/poll-ntp-pool
-#!/sbin/openrc-run
-
-name="poll-ntp-pool"
-command="/etc/periodic/daily/poll-ntp-pool.sh"
-pidfile="/var/run/poll-ntp-pool.pid"
-
-depend() {
-	need net
-  need localmount
-	use dns
-}
-EOF
-
-  chmod +x /etc/init.d/poll-ntp-pool
-  rc-update add poll-ntp-pool
+  echo "@reboot                                 /etc/periodic/daily/poll-ntp-pool.sh > /var/log/pool-ntp-pool.log 2>&1" | \
+    tee -a /var/spool/cron/crontabs/root
 
   # other stuff
   apk add --no-cache curl vim

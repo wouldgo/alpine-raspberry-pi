@@ -13,7 +13,7 @@ function do_it () {
     rc-update add $service boot
   done
 
-  for service in dbus haveged sshd chronyd local networking avahi-daemon bluetooth wpa_supplicant wpa_cli; do
+  for service in dbus haveged sshd chronyd local networking avahi-daemon bluetooth wpa_supplicant wpa_cli crond; do
     rc-update add $service default
   done
 
