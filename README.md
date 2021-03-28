@@ -24,17 +24,17 @@ Config docker-build.sh:
 * default config
   * hostnane=raspberrypi
   * device-name=sda
-  * root-passowrd=raspberry
-  * tdp=lan
+  * root-password=raspberry
+  * tld=lan
   * username=pi
   * user-password=raspberry
-  * locale=it-it
+  * locale=us-us
   * timezone=UTC
   * dns-server-name=
   * dns-domain-name=
 
 * no param: using all default values
-* specify config file: 
+* specify config file:
   * -f: file that contains the export of all variables you want to specify
   * note: this will override other single parameters
 * specify single params:

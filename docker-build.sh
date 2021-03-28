@@ -28,7 +28,7 @@ function do_it() {
 
 while getopts ":f:h:d:r:i:u:p:l:t:s:v:" arg; do
   case $arg in
-    f) COMNFIG=$OPTARG;;
+    f) CONFIG=$OPTARG;;
     h) TARGET_HOSTNAME=$OPTARG;;
     d) DEVICE_NAME=$OPTARG;;
     r) ROOT_PASSWORD=$OPTARG;;
@@ -39,11 +39,25 @@ while getopts ":f:h:d:r:i:u:p:l:t:s:v:" arg; do
     t) TIMEZONE=$OPTARG;;
     s) DNS_SERVER=$OPTARG;;
     v) DNS_DOMAIN=$OPTARG;;
+    *) echo "Invalid option
+Options are:
+  - f: file that contains the export of all variables you want to specify;
+  - h: hostname;
+  - d: device-name;
+  - r: root-passowrd;
+  - i: internal lan suffix;
+  - u: user name;
+  - p: user password;
+  - l: locale;
+  - t: timezone;
+  - s: dns server name;
+  - v: dna domain name;"; exit 1
   esac
 done
 
-if [[ ! -z "${CONFIG}" ]] && [[ -f ${CONFIG} ]]; then
-  source $CONFIG
+if [[ -n "${CONFIG}" ]] && [[ -f "${CONFIG}" ]]; then
+
+  env "$(xargs < "${CONFIG}")"
 fi
 
 do_it "$@"

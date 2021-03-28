@@ -33,9 +33,11 @@ function do_it () {
   __TLD="${TLD:-lan}"
   __USERNAME="${USERNAME:-pi}"
   __PASSWORD="${PASSWORD:-raspberry}"
-  __LOCALE="${LOCALE:-it-it}"
+  __LOCALE="${LOCALE:-us-us}"
   __TIMEZONE="${TIMEZONE:-UTC}"
+  # shellcheck disable=SC2153
   __DNS_SERVER="${DNS_SERVER}"
+  # shellcheck disable=SC2153
   __DNS_DOMAIN="${DNS_DOMAIN}"
 
   OUTPUT_IMG="/dist/target.img"

@@ -8,10 +8,11 @@ function do_it () {
   local TLD
   local DEVICE_NAME
   local LOCALE
+  local LAYOUT
+  local LAYOUT_SPEC
   local TIMEZONE
   local DNS_DOMAIN
   local DNS_SERVER
-  local NTP
 
   TARGET_HOSTNAME="${1}"
   ROOT_PASSWORD="${2}"
@@ -21,7 +22,9 @@ function do_it () {
   TIMEZONE="${6}"
   DNS_SERVER="${7}"
   DNS_DOMAIN="${8}"
-  
+  LAYOUT="$( cut -d '-' -f 1 <<< "$LOCALE" )";
+  LAYOUT_SPEC="$( cut -d '-' -f 2 <<< "$LOCALE" )";
+
   # base stuff
   apk add --no-cache ca-certificates
   update-ca-certificates
@@ -29,14 +32,12 @@ function do_it () {
   setup-hostname "${TARGET_HOSTNAME}"
   echo "127.0.0.1    ${TARGET_HOSTNAME} ${TARGET_HOSTNAME}.${TLD}" > /etc/hosts
 
-  local LAYOUT="$( cut -d '-' -f 1 <<< "$LOCALE" )";
-  local LAYOUT_SPEC="$( cut -d '-' -f 2 <<< "$LOCALE" )";
   setup-keymap "${LAYOUT}" "${LAYOUT_SPEC}"
 
-  if [[ ! -z "${DNS_DOMAIN}" ]] && [[ ! -z "${DNS_SERVER}" ]]; then
-    setup-dns -d ${DNS_DOMAIN} -n ${DNS_SERVER}
+  if [[ -n "${DNS_DOMAIN}" ]] && [[ -n "${DNS_SERVER}" ]]; then
+    setup-dns -d "${DNS_DOMAIN}" -n "${DNS_SERVER}"
   fi
-  
+
   setup-apkrepos -f
   setup-apkcache "/media/${DEVICE_NAME}/cache"
 
