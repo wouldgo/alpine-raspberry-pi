@@ -6,8 +6,8 @@ function do_it () {
   local USERNAME
   local PASSWORD
 
-  USERNAME="${5}"
-  PASSWORD="${6}"
+  USERNAME="${1}"
+  PASSWORD="${2}"
 
   apk add --no-cache sudo
 

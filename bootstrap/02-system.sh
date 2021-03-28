@@ -6,22 +6,43 @@ function do_it () {
   local TARGET_HOSTNAME
   local ROOT_PASSWORD
   local TLD
+  local DEVICE_NAME
+  local LOCALE
+  local TIMEZONE
+  local DNS_DOMAIN
+  local DNS_SERVER
+  local NTP
 
   TARGET_HOSTNAME="${1}"
-  ROOT_PASSWORD="${3}"
-  TLD="${4}"
-
+  ROOT_PASSWORD="${2}"
+  TLD="${3}"
+  DEVICE_NAME="${4}"
+  LOCALE="${5}"
+  TIMEZONE="${6}"
+  DNS_SERVER="${7}"
+  DNS_DOMAIN="${8}"
+  
   # base stuff
   apk add --no-cache ca-certificates
   update-ca-certificates
   echo "root:${ROOT_PASSWORD}" | chpasswd
   setup-hostname "${TARGET_HOSTNAME}"
   echo "127.0.0.1    ${TARGET_HOSTNAME} ${TARGET_HOSTNAME}.${TLD}" > /etc/hosts
-  setup-keymap us us
+
+  local LAYOUT="$( cut -d '-' -f 1 <<< "$LOCALE" )";
+  local LAYOUT_SPEC="$( cut -d '-' -f 2 <<< "$LOCALE" )";
+  setup-keymap "${LAYOUT}" "${LAYOUT_SPEC}"
+
+  if [[ ! -z "${DNS_DOMAIN}" ]] && [[ ! -z "${DNS_SERVER}" ]]; then
+    setup-dns -d ${DNS_DOMAIN} -n ${DNS_SERVER}
+  fi
+  
+  setup-apkrepos -f
+  setup-apkcache "/media/${DEVICE_NAME}/cache"
 
   # time
   apk add --no-cache chrony tzdata
-  setup-timezone -z UTC
+  setup-timezone -z "${TIMEZONE}"
   cat <<EOF > /etc/periodic/daily/poll-ntp-pool.sh
 #!/bin/sh
 

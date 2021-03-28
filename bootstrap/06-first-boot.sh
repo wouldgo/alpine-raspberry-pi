@@ -5,7 +5,7 @@ function do_it () {
 
   local DEVICE_NAME
 
-  DEVICE_NAME="${2}"
+  DEVICE_NAME="${1}"
 
   apk add --no-cache dosfstools e2fsprogs-extra parted
 

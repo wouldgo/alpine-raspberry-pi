@@ -9,6 +9,10 @@ function do_it () {
   local __TLD
   local __USERNAME
   local __PASSWORD
+  local __LOCALE
+  local __TIMEZONE
+  local __DNS_SERVER
+  local __DNS_DOMAIN
 
   local OUTPUT_IMG
 
@@ -27,8 +31,12 @@ function do_it () {
   __DEVICE_NAME="${DEVICE_NAME:-sda}"
   __ROOT_PASSWORD="${ROOT_PASSWORD:-raspberry}"
   __TLD="${TLD:-lan}"
-  __USERNAME=${USERNAME:-pi}
-  __PASSWORD=${PASSWORD:-raspberry}
+  __USERNAME="${USERNAME:-pi}"
+  __PASSWORD="${PASSWORD:-raspberry}"
+  __LOCALE="${LOCALE:-it-it}"
+  __TIMEZONE="${TIMEZONE:-UTC}"
+  __DNS_SERVER="${DNS_SERVER}"
+  __DNS_DOMAIN="${DNS_DOMAIN}"
 
   OUTPUT_IMG="/dist/target.img"
 
@@ -79,13 +87,13 @@ EOF
 
   cp -R bootstrap/ /alpine/
 
-  /alpine/enter-chroot /bootstrap/00-environment.sh "${__TARGET_HOSTNAME}" "${__DEVICE_NAME}" "${__ROOT_PASSWORD}" "${__TLD}" "${__USERNAME}" "${__PASSWORD}"
-  /alpine/enter-chroot /bootstrap/01-kernel.sh "${__TARGET_HOSTNAME}" "${__DEVICE_NAME}" "${__ROOT_PASSWORD}" "${__TLD}" "${__USERNAME}" "${__PASSWORD}"
-  /alpine/enter-chroot /bootstrap/02-system.sh "${__TARGET_HOSTNAME}" "${__DEVICE_NAME}" "${__ROOT_PASSWORD}" "${__TLD}" "${__USERNAME}" "${__PASSWORD}"
-  /alpine/enter-chroot /bootstrap/03-users.sh "${__TARGET_HOSTNAME}" "${__DEVICE_NAME}" "${__ROOT_PASSWORD}" "${__TLD}" "${__USERNAME}" "${__PASSWORD}"
-  /alpine/enter-chroot /bootstrap/04-networking.sh "${__TARGET_HOSTNAME}" "${__DEVICE_NAME}" "${__ROOT_PASSWORD}" "${__TLD}" "${__USERNAME}" "${__PASSWORD}"
-  /alpine/enter-chroot /bootstrap/05-services.sh "${__TARGET_HOSTNAME}" "${__DEVICE_NAME}" "${__ROOT_PASSWORD}" "${__TLD}" "${__USERNAME}" "${__PASSWORD}"
-  /alpine/enter-chroot /bootstrap/06-first-boot.sh "${__TARGET_HOSTNAME}" "${__DEVICE_NAME}" "${__ROOT_PASSWORD}" "${__TLD}" "${__USERNAME}" "${__PASSWORD}"
+  /alpine/enter-chroot /bootstrap/00-environment.sh
+  /alpine/enter-chroot /bootstrap/01-kernel.sh "${__DEVICE_NAME}"
+  /alpine/enter-chroot /bootstrap/02-system.sh "${__TARGET_HOSTNAME}" "${__ROOT_PASSWORD}" "${__TLD}" "${__DEVICE_NAME}" "${__LOCALE}" "${__TIMEZONE}" "${__DNS_SERVER}" "${__DNS_DOMAIN}"
+  /alpine/enter-chroot /bootstrap/03-users.sh "${__USERNAME}" "${__PASSWORD}"
+  /alpine/enter-chroot /bootstrap/04-networking.sh "${__TARGET_HOSTNAME}"
+  /alpine/enter-chroot /bootstrap/05-services.sh
+  /alpine/enter-chroot /bootstrap/06-first-boot.sh "${__DEVICE_NAME}"
 
   rm -rf /alpine/var/lib/apt/lists/*
   rm -rf /alpine/var/cache/apk/*

@@ -3,7 +3,7 @@
 function do_it () {
   set -xe
 
-  apk add --no-cache openssh haveged
+  apk add --no-cache openssh openssl haveged
 
   for service in devfs dmesg mdev; do
     rc-update add $service sysinit
