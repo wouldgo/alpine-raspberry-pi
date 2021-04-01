@@ -5,7 +5,7 @@ function do_it () {
 
   local DEVICE_NAME
 
-  DEVICE_NAME="${2}"
+  DEVICE_NAME="${1}"
 
   echo "modules=loop,squashfs,sd-mod,usb-storage root=/dev/${DEVICE_NAME}2 rootfstype=ext4 elevator=deadline fsck.repair=yes console=tty1 rootwait quiet cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory" > /boot/cmdline.txt
 
