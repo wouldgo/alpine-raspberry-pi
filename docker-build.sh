@@ -51,7 +51,7 @@ Options are:
   - l: locale;
   - t: timezone;
   - s: dns server name;
-  - v: dna domain name;"; exit 1
+  - v: dns domain name;"; exit 1
   esac
 done
 

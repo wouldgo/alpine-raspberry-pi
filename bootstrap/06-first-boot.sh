@@ -13,7 +13,7 @@ function do_it () {
 #!/bin/sh
 set -xe
 
-cat <<PARTED | sudo parted ---pretend-input-tty /dev/${DEVICE_NAME}
+cat <<PARTED | parted ---pretend-input-tty /dev/${DEVICE_NAME}
 unit %
 resizepart 2
 Yes
@@ -24,11 +24,6 @@ partprobe
 resize2fs /dev/${DEVICE_NAME}2
 rc-update del first-boot
 rm /etc/init.d/first-boot /usr/bin/first-boot
-
-fallocate -l 1g /swapfile
-chmod 600 /swapfile
-mkswap /swapfile
-echo "/swapfile       none            swap    sw                0       0" >> /etc/fstab
 
 reboot
 EOF
