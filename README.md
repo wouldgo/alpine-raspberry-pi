@@ -47,4 +47,4 @@ Config docker-build.sh:
   * -l locale
   * -t timezone
   * -s dns server name
-  * -v dna domain name
+  * -v dns domain name
