@@ -37,6 +37,13 @@ EOF
 /dev/${DEVICE_NAME}2  /               ext4    defaults,noatime  0       1
 EOF
 
+  cat <<EOF >> /etc/sysctl.conf
+vm.vfs_cache_pressure=500
+vm.swappiness=100
+vm.dirty_background_ratio=1
+vm.dirty_ratio=50
+EOF
+
   apk add --no-cache \
     linux-rpi \
     linux-rpi4 \
