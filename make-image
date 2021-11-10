@@ -2,7 +2,7 @@
 
 function do_it () {
   set -xe
-
+  local ALPINE_VERSION
   local __TARGET_HOSTNAME
   local __DEVICE_NAME
   local __ROOT_PASSWORD
@@ -27,6 +27,7 @@ function do_it () {
   local PART_END
   local FREE_START
 
+  ALPINE_VERSION="v0.13.1"
   __TARGET_HOSTNAME="${TARGET_HOSTNAME:-raspberrypi}"
   __DEVICE_NAME="${DEVICE_NAME:-sda}"
   __ROOT_PASSWORD="${ROOT_PASSWORD:-raspberry}"
@@ -85,7 +86,7 @@ EOF
   echo "root partition uuid: ${ROOT_PARTUUID}"
 
   apt-get update
-  curl https://raw.githubusercontent.com/alpinelinux/alpine-chroot-install/master/alpine-chroot-install | sh
+  curl https://raw.githubusercontent.com/alpinelinux/alpine-chroot-install/${ALPINE_VERSION}/alpine-chroot-install | sh
 
   cp -R bootstrap/ /alpine/
 
