@@ -27,7 +27,7 @@ function do_it () {
   local PART_END
   local FREE_START
 
-  ALPINE_VERSION="v0.13.1"
+  ALPINE_VERSION="v0.13.2"
   __TARGET_HOSTNAME="${TARGET_HOSTNAME:-raspberrypi}"
   __DEVICE_NAME="${DEVICE_NAME:-sda}"
   __ROOT_PASSWORD="${ROOT_PASSWORD:-raspberry}"
