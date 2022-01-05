@@ -3,7 +3,7 @@
 function do_it () {
   set -xe
 
-  apk add --no-cache openssh openssl rng-tools eudev
+  apk add --no-cache openssh openssl rng-tools eudev iptables
 
 
   for service in devfs dmesg mdev; do
@@ -14,7 +14,7 @@ function do_it () {
     rc-update add $service boot
   done
 
-  for service in dbus sshd chronyd local networking avahi-daemon bluetooth wpa_supplicant wpa_cli crond; do
+  for service in iptables dbus sshd chronyd local networking avahi-daemon bluetooth wpa_supplicant wpa_cli crond; do
     rc-update add $service default
   done
 

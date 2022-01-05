@@ -44,6 +44,10 @@ vm.dirty_background_ratio=1
 vm.dirty_ratio=50
 EOF
 
+  cat <<EOF | tee /etc/sysctl.d/k3s_arp.conf
+net.ipv4.conf.all.arp_filter=1
+EOF
+
   apk add --no-cache \
     linux-rpi \
     linux-rpi4 \
