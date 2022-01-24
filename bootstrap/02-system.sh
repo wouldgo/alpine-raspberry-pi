@@ -48,24 +48,9 @@ function do_it () {
   echo "-- chrony.conf --"
   cat /etc/chrony/chrony.conf
   echo "-- chrony.conf --"
-#   cat <<EOF > /etc/periodic/daily/poll-ntp-pool.sh
-# #!/bin/sh
-
-# until nslookup pool.ntp.org; do
-#   echo \"waiting for network\";
-#   sleep 1;
-# done
-
-# ntpd -d -q -n -p pool.ntp.org
-# EOF
-
-#   chmod u+x /etc/periodic/daily/poll-ntp-pool.sh
-
-#   echo "@reboot                                 /etc/periodic/daily/poll-ntp-pool.sh > /var/log/pool-ntp-pool.log 2>&1" | \
-#     tee -a /var/spool/cron/crontabs/root
 
   # other stuff
-  apk add --no-cache curl vim
+  apk add --no-cache curl vim drill
   sed -i 's/\/bin\/ash/\/bin\/bash/g' /etc/passwd
 }
 
